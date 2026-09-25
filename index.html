@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS Photobooth</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="max-w-4xl w-full bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
+        <h1 class="text-3xl font-extrabold text-center mb-2 bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+            📸 Our Photobooth
+        </h1>
+        <p class="text-gray-400 text-center mb-6">Pilih frame favoritmu, bergaya, lalu capture!</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Sisi Kiri & Tengah: Kamera & Tombol -->
+            <div class="md:col-span-2 flex flex-col items-center">
+                <div id="camera-container" class="relative w-full aspect-[4/3] bg-black rounded-xl overflow-hidden shadow-inner border-4 border-gray-700 flex items-center justify-center">
+                    <!-- Elemen Video Kamera -->
+                    <video id="video" autoplay playsinline class="w-full h-full object-cover -scale-x-100"></video>
+                    <!-- Overlay Frame di Live Camera -->
+                    <div id="live-frame" class="absolute inset-0 pointer-events-none border-[15px] border-transparent flex flex-col justify-between p-4 transition-all duration-300">
+                        <div class="flex justify-between items-start text-xs font-bold opacity-80"><span></span><span id="live-date"></span></div>
+                        <div class="text-center text-xs font-bold opacity-80"> </div>
+                    </div>
+                </div>
+
+                <!-- Pilihan Frame -->
+                <div class="w-full mt-4">
+                    <label class="block text-sm font-semibold mb-2 text-gray-300">Choose Frame:</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="setFrame('pink')" class="p-2 rounded-lg bg-pink-500 text-xs font-bold hover:opacity-80 transition cursor-pointer">Pinky</button>
+                        <button onclick="setFrame('dark')" class="p-2 rounded-lg bg-gray-900 text-xs font-bold hover:opacity-80 transition border border-gray-600 cursor-pointer">Dark</button>
+                        <button onclick="setFrame('neon')" class="p-2 rounded-lg bg-emerald-500 text-xs font-bold hover:opacity-80 transition cursor-pointer">Neon</button>
+                        <button onclick="setFrame('retro')" class="p-2 rounded-lg bg-amber-600 text-xs font-bold hover:opacity-80 transition cursor-pointer">Retro</button>
+                    </div>
+                </div>
+
+                <!-- Tombol Ambil Foto -->
+                <button id="capture-btn" class="mt-6 w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:opacity-90 active:scale-95 transition cursor-pointer">
+                    Take Picture 📸
+                </button>
+            </div>
+
+            <!-- Sisi Kanan: Hasil Foto -->
+            <div class="flex flex-col items-center justify-between bg-gray-900/50 p-4 rounded-xl border border-gray-700">
+                <div class="w-full text-center">
+                    <h2 class="text-lg font-bold mb-3 text-gray-200">Hasil Foto</h2>
+                    <div id="result-container" class="w-full aspect-[3/4] bg-gray-800 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-600 overflow-hidden relative">
+                        <span class="text-gray-500 text-sm text-center p-4">Foto kamu bakal muncul di sini</span>
+                    </div>
+                </div>
+
+                <!-- Tombol Download -->
+                <a id="download-btn" class="mt-4 hidden w-full py-2.5 bg-green-600 text-center text-white font-bold rounded-lg shadow hover:bg-green-500 transition cursor-pointer">
+                    Download Image 💾
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Efek Flash Layar -->
+    <div id="flash-effect" class="fixed inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-150"></div>
+
+    <!-- Canvas Tersembunyi untuk Proses Gambar -->
+    <canvas id="canvas" class="hidden"></canvas>
+
+    <!-- Panggil file script.js terpisah -->
+    <script src="sc.js"></script>
+</body>
+</html>
