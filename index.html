@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS Photobooth</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image" href="ikon Nisa.png"
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- ==================== WELCOME SCREEN: PILIH TEMA BOOTH ==================== -->
+    <div id="welcome-screen" class="max-w-4xl w-full bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
+        <h1 class="text-3xl font-extrabold text-center mb-2 bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+                 Our Photobooth
+        </h1>
+        <p class="text-gray-400 text-center mb-8">Pilih tema booth kamu buat mulai foto!</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <button onclick="enterBooth('classic')" class="theme-card flex flex-col items-center gap-3 p-4 rounded-xl bg-gray-900/60 border border-gray-700 hover:border-pink-500 hover:bg-gray-900 transition cursor-pointer">
+                <div class="w-full aspect-[9/16] rounded-lg shadow-inner overflow-hidden bg-white flex items-center justify-center p-6">
+                    <img src="assets/nisastudio.jpeg" alt="Nisa Studio" class="max-w-full max-h-full object-contain">
+                </div>
+                <span class="font-bold">Booth 1</span>
+                <span class="text-xs text-gray-400 text-center">Classic White, Brownc & Bured — pilih frame-nya di dalam</span>
+            </button>
+            <div class="theme-card flex flex-col items-center gap-3 p-4 rounded-xl bg-gray-900/30 border border-dashed border-gray-700 opacity-60 cursor-not-allowed">
+                <div class="w-full aspect-[9/16] rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center">
+                    <span class="text-4xl text-gray-600">+</span>
+                </div>
+                <span class="font-bold text-gray-400">Booth 2</span>
+                <span class="text-xs text-gray-500 text-center">Segera hadir</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== BOOTH SCREEN: KAMERA & CAPTURE ==================== -->
+    <div id="booth-screen" class="hidden max-w-4xl w-full bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
+        <div class="flex items-center justify-between mb-2">
+            <button onclick="exitBooth()" class="text-sm text-gray-400 hover:text-white transition cursor-pointer">⬅ Ganti Tema</button>
+            <h1 class="text-xl font-extrabold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+                Our Photobooth
+            </h1>
+            <span class="w-16"></span>
+        </div>
+        <p class="text-gray-400 text-center mb-6">Bergaya, lalu capture!</p>
+
+        <div class="w-full max-w-xl mx-auto flex flex-col items-center">
+            <div id="camera-container" class="relative w-full aspect-[3/4] md:aspect-[4/3] bg-black rounded-xl overflow-hidden shadow-inner border-4 border-gray-700 flex items-center justify-center">
+                <!-- Elemen Video Kamera -->
+                <video id="video" autoplay playsinline class="w-full h-full object-cover -scale-x-100"></video>
+                <!-- Overlay Countdown Ambil Foto -->
+                <div id="countdown-overlay" class="absolute inset-0 hidden items-center justify-center bg-black/40 text-white text-7xl font-extrabold z-10">3</div>
+                <!-- Overlay Frame di Live Camera (placeholder, tidak dipakai lagi untuk dekorasi) -->
+                <div id="live-frame" class="absolute inset-0 pointer-events-none"></div>
+            </div>
+
+            <!-- Trigger Buka Pilihan -->
+            <div class="w-full mt-4 grid grid-cols-2 gap-2">
+                <button id="open-count-modal" class="p-3 rounded-lg bg-gray-700 text-xs font-bold hover:opacity-80 transition cursor-pointer">
+                    Jumlah Foto: <span id="count-label">3x</span>
+                </button>
+                <button id="open-effect-modal" class="p-3 rounded-lg bg-gray-700 text-xs font-bold hover:opacity-80 transition cursor-pointer">
+                    Frame: <span id="effect-label">Classic White</span>
+                </button>
+            </div>
+
+            <!-- Tombol Ambil Foto -->
+            <button id="capture-btn" class="mt-6 w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:opacity-90 active:scale-95 transition cursor-pointer">
+                Take Photos 📸
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== EDIT SCREEN: PILIH/GANTI FRAME SETELAH FOTO ==================== -->
+    <div id="edit-screen" class="hidden max-w-4xl w-full bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
+        <h1 class="text-xl font-extrabold text-center mb-6 bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+            Edit & Pilih Frame
+        </h1>
+
+        <!-- Panel Pilih Foto Favorit (muncul kalau jumlah foto yang diambil butuh diseleksi dulu) -->
+        <div id="photo-pick-section" class="hidden mb-6">
+            <!-- Toggle Format (khusus take 6x-12x: boleh pilih mau jadi 3 foto atau 6 foto) -->
+            <div id="photo-pick-format" class="hidden mb-3">
+                <label class="text-sm font-semibold text-gray-300 block mb-2">Mau jadi berapa foto?</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="setPickFormat(3)" data-format="3" class="pick-format-btn p-2.5 rounded-lg bg-gray-700 text-xs font-bold hover:opacity-80 transition cursor-pointer">3 Foto</button>
+                    <button onclick="setPickFormat(6)" data-format="6" class="pick-format-btn p-2.5 rounded-lg bg-gray-700 text-xs font-bold hover:opacity-80 transition cursor-pointer">6 Foto</button>
+                </div>
+            </div>
+
+            <div id="photo-pick-grid-wrap">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="text-sm font-semibold text-gray-300">Pilih Foto Favorit:</label>
+                    <span id="photo-pick-counter" class="text-xs text-gray-400"></span>
+                </div>
+            <div id="photo-pick-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Preview Hasil -->
+            <div class="md:col-span-2 flex items-center justify-center bg-gray-900/50 rounded-xl border border-gray-700 p-3" style="min-height:300px;">
+                <img id="edit-preview-img" class="max-w-full max-h-[60vh] object-contain rounded-lg">
+            </div>
+
+            <!-- Pilihan Frame & Aksi -->
+            <div class="flex flex-col gap-3">
+                <label class="text-sm font-semibold text-gray-300">Pilih Frame:</label>
+                <button onclick="selectEditFrame('classic')" data-frame="classic" class="edit-frame-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">Classic White</button>
+                <button onclick="selectEditFrame('frame1')" data-frame="frame1" class="edit-frame-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">Brownc</button>
+                <button onclick="selectEditFrame('frame2')" data-frame="frame2" class="edit-frame-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">Bured</button>
+                <button onclick="selectEditFrame('frame3')" data-frame="frame3" class="edit-frame-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">Silver Fang</button>
+                <p id="edit-frame-note" class="hidden text-xs text-amber-400 text-center">Jumlah foto yang dipilih bukan kelipatan 3, jadi foto terakhir bakal diulang buat ngisi slot kosong di lembar terakhir.</p>
+
+                <div class="flex-1"></div>
+
+                <a id="edit-download-btn" class="w-full py-2.5 bg-green-600 text-center text-white font-bold rounded-lg shadow hover:bg-green-500 transition cursor-pointer">
+                    Download Image 💾
+                </a>
+                <button onclick="backToBoothFromEdit()" class="w-full py-2.5 bg-gray-700 text-center text-white font-bold rounded-lg shadow hover:opacity-80 transition cursor-pointer">
+                    🔁 Ambil Ulang
+                </button>
+                <button onclick="finishEditing()" class="w-full py-2.5 bg-purple-600 text-center text-white font-bold rounded-lg shadow hover:bg-purple-500 transition cursor-pointer">
+                    ✅ Selesai
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Efek Flash Layar -->
+    <div id="flash-effect" class="fixed inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-150"></div>
+
+    <!-- Modal Pilih Jumlah Foto -->
+    <div id="count-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm max-h-[80vh] overflow-y-auto">
+            <h3 class="text-lg font-bold mb-4 text-center">Pilih Jumlah Foto</h3>
+            <div class="grid grid-cols-4 gap-2">
+                <button onclick="setShotCount(1)" data-count="1" class="count-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">1x</button>
+                <button onclick="setShotCount(2)" data-count="2" class="count-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">2x</button>
+                <button onclick="setShotCount(3)" data-count="3" class="count-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">3x</button>
+                <button onclick="setShotCount(4)" data-count="4" class="count-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">4x</button>
+                <button onclick="setShotCount(5)" data-count="5" class="count-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">5x</button>
+                <button onclick="setShotCount(6)" data-count="6" class="count-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">6x</button>
+                <button onclick="setShotCount(7)" data-count="7" class="count-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">7x</button>
+                <button onclick="setShotCount(8)" data-count="8" class="count-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">8x</button>
+                <button onclick="setShotCount(9)" data-count="9" class="count-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">9x</button>
+                <button onclick="setShotCount(10)" data-count="10" class="count-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">10x</button>
+                <button onclick="setShotCount(11)" data-count="11" class="count-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">11x</button>
+                <button onclick="setShotCount(12)" data-count="12" class="count-btn p-3 rounded-lg bg-gray-700 font-bold hover:opacity-80 transition cursor-pointer">12x</button>
+            </div>
+            <p class="text-xs text-gray-400 text-center mt-3">Foto akan disusun ulang per 3 lembar bingkai sesuai frame yang dipilih.</p>
+            <button onclick="closeModal('count-modal')" class="mt-4 w-full py-2 text-sm text-gray-400 hover:text-white transition cursor-pointer">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Modal Pilih Frame -->
+    <div id="effect-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm">
+            <h3 class="text-lg font-bold mb-4 text-center">Pilih Frame</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="setFrameChoice('classic')" data-effect="classic" class="effect-btn flex flex-col items-center gap-2 p-2 rounded-lg bg-gray-700 hover:opacity-80 transition cursor-pointer">
+                    <img src="frames/classic.png" class="w-full aspect-[9/16] object-cover rounded bg-white">
+                    <span class="text-xs font-bold">Classic White</span>
+                </button>
+                <button onclick="setFrameChoice('frame1')" data-effect="frame1" class="effect-btn flex flex-col items-center gap-2 p-2 rounded-lg bg-gray-700 hover:opacity-80 transition cursor-pointer">
+                    <img src="frames/frame1.png" class="w-full aspect-[9/16] object-cover rounded bg-white">
+                    <span class="text-xs font-bold">Brownc</span>
+                </button>
+                <button onclick="setFrameChoice('frame2')" data-effect="frame2" class="effect-btn flex flex-col items-center gap-2 p-2 rounded-lg bg-gray-700 hover:opacity-80 transition cursor-pointer">
+                    <img src="frames/frame2.png" class="w-full aspect-[9/16] object-cover rounded bg-white">
+                    <span class="text-xs font-bold">Bured</span>
+                </button>
+                <button onclick="setFrameChoice('frame3')" data-effect="frame3" class="effect-btn flex flex-col items-center gap-2 p-2 rounded-lg bg-gray-700 hover:opacity-80 transition cursor-pointer">
+                    <img src="frames/frame3.png" class="w-full aspect-[9/16] object-cover rounded bg-white">
+                    <span class="text-xs font-bold">Silver Fang</span>
+                </button>
+            </div>
+            <button onclick="closeModal('effect-modal')" class="mt-4 w-full py-2 text-sm text-gray-400 hover:text-white transition cursor-pointer">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Canvas Tersembunyi untuk Proses Gambar -->
+    <canvas id="canvas" class="hidden"></canvas>
+
+    <!-- Panggil file script.js terpisah -->
+    <script src="sc.js"></script>
+</body>
+</html>
